@@ -124,6 +124,34 @@ Provider-specific model flags take precedence over `--model`. For example:
 llm-harness --provider both --claude-model sonnet --openai-model gpt-4o-mini "Compare these answers"
 ```
 
+## Smoke Scripts
+
+The repository includes a few runnable smoke scripts:
+
+- `scripts/smoke_openai.sh`
+- `scripts/smoke_claude.sh`
+- `scripts/smoke_both.sh`
+
+Make them executable once:
+
+```bash
+chmod +x scripts/*.sh
+```
+
+Run them with the built-in prompt:
+
+```bash
+./scripts/smoke_openai.sh
+./scripts/smoke_claude.sh
+./scripts/smoke_both.sh
+```
+
+Or pass your own prompt:
+
+```bash
+./scripts/smoke_both.sh "Compare how each provider would explain this tool"
+```
+
 ## How It Works
 
 - OpenAI calls use the `openai` Python SDK and `OPENAI_API_KEY`
