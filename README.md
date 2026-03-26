@@ -1,4 +1,4 @@
-# llm-harness
+# v0.1.0 - Initial unified OpenAI and Claude CLI harness
 
 First release of llm-harness, a lightweight Python CLI for running prompts against OpenAI, Claude Code, or both from one command. Includes parallel dual-provider mode, provider-specific model flags, JSON/Markdown/terminal output, smoke scripts, and a typed provider abstraction for future backends.
 
