@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "llm-harness"
+version = "0.1.0"
+description = "Single CLI harness for OpenAI and Claude Code."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "click",
+  "openai",
+  "python-dotenv",
+]
+
+[project.scripts]
+llm-harness = "llm_harness.cli:cli"
+
+[tool.setuptools]
+packages = ["llm_harness", "llm_harness.providers"]
+
