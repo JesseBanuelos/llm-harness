@@ -1,6 +1,16 @@
 # v0.1.0 - Initial unified OpenAI and Claude CLI harness
 
-First release of llm-harness, a lightweight Python CLI for running prompts against OpenAI, Claude Code, or both from one command. Includes parallel dual-provider mode, provider-specific model flags, JSON/Markdown/terminal output, smoke scripts, and a typed provider abstraction for future backends.
+`llm-harness` is a lightweight Python CLI for running prompts against OpenAI, Claude Code, or both from a single command.
+
+It supports:
+- OpenAI via the official `openai` Python SDK
+- Claude via the local `claude` CLI in `--print` mode
+- Parallel dual-provider execution for side-by-side comparisons
+- Terminal, Markdown, and JSON output modes
+- Provider-specific model selection and simple smoke scripts
+
+Claude uses local Claude Code authentication, so no Anthropic API key is required. OpenAI uses `OPENAI_API_KEY` from your environment or a local `.env` file.
+
 
 ## Prerequisites
 
