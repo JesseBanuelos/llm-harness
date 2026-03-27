@@ -60,3 +60,15 @@ class ClaudeCLIProviderTests(unittest.TestCase):
             with self.assertRaisesRegex(RuntimeError, "Claude CLI error: boom"):
                 provider.call(prompt="Hi", system=None, model="sonnet")
 
+    def test_call_uses_stdout_when_stderr_is_empty_on_failure(self) -> None:
+        provider = ClaudeCLIProvider()
+        completed = subprocess.CompletedProcess(
+            args=["claude"],
+            returncode=1,
+            stdout="Not logged in · Please run /login",
+            stderr="",
+        )
+
+        with patch("subprocess.run", return_value=completed):
+            with self.assertRaisesRegex(RuntimeError, "Please run /login"):
+                provider.call(prompt="Hi", system=None, model="sonnet")

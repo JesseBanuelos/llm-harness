@@ -103,3 +103,26 @@ class RouterTests(unittest.TestCase):
         )
 
         self.assertEqual(openai.calls[0][2], "gpt-4.1")
+
+    def test_both_route_captures_provider_factory_errors_independently(self) -> None:
+        claude = StubProvider("claude text", default_model="sonnet")
+
+        def broken_openai_factory() -> StubProvider:
+            raise RuntimeError("OPENAI_API_KEY is not set")
+
+        router = HarnessRouter(
+            openai_factory=broken_openai_factory,
+            claude_provider=claude,
+        )
+
+        results = router.dispatch(
+            provider_name="both",
+            prompt="Compare",
+            system=None,
+            model_override=None,
+            openai_model_override=None,
+            claude_model_override=None,
+        )
+
+        self.assertEqual(results[0].response, "claude text")
+        self.assertEqual(results[1].error, "OPENAI_API_KEY is not set")

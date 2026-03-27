@@ -4,7 +4,7 @@ from unittest.mock import patch
 
 from click.testing import CliRunner
 
-from llm_harness.cli import ProviderResult, cli, format_results
+from llm_harness.cli import ProviderResult, build_router, cli, format_results
 
 
 class CLITests(unittest.TestCase):
@@ -100,3 +100,12 @@ class CLITests(unittest.TestCase):
             openai_model_override=None,
             claude_model_override="opus",
         )
+
+    def test_build_router_does_not_construct_openai_for_claude_only(self) -> None:
+        with patch("llm_harness.cli.OpenAIProvider") as openai_mock, patch(
+            "llm_harness.cli.ClaudeCLIProvider"
+        ) as claude_mock:
+            build_router(provider_name="claude", timeout=120, output_format="terminal")
+
+        openai_mock.assert_not_called()
+        claude_mock.assert_not_called()

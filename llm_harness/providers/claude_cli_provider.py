@@ -40,7 +40,9 @@ class ClaudeCLIProvider(LLMProvider):
             ) from exc
 
         if result.returncode != 0:
-            stderr = result.stderr.strip() or "Unknown Claude CLI error."
-            raise RuntimeError(f"Claude CLI error: {stderr}")
+            error_text = result.stderr.strip() or result.stdout.strip()
+            if not error_text:
+                error_text = f"Unknown Claude CLI error (exit code {result.returncode})."
+            raise RuntimeError(f"Claude CLI error: {error_text}")
 
         return result.stdout.strip()

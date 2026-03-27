@@ -8,8 +8,9 @@ from llm_harness.providers.openai_provider import OpenAIProvider
 class OpenAIProviderTests(unittest.TestCase):
     @patch.dict(os.environ, {}, clear=True)
     def test_init_raises_when_api_key_missing(self) -> None:
-        with self.assertRaisesRegex(RuntimeError, "OPENAI_API_KEY"):
-            OpenAIProvider()
+        with patch("llm_harness.providers.openai_provider._load_dotenv", return_value=None):
+            with self.assertRaisesRegex(RuntimeError, "OPENAI_API_KEY"):
+                OpenAIProvider()
 
     @patch.dict(os.environ, {"OPENAI_API_KEY": "test-key"}, clear=True)
     def test_call_uses_chat_completions(self) -> None:
@@ -63,4 +64,3 @@ class OpenAIProviderTests(unittest.TestCase):
 
         self.assertEqual(result, "Hello world")
         self.assertEqual(captured, ["Hello", " world"])
-

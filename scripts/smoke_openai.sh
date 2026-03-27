@@ -5,6 +5,12 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PROMPT="${1:-Give me a one-sentence summary of why this harness is useful.}"
 
+if [[ -f "$ROOT_DIR/.env" ]]; then
+  set -a
+  source "$ROOT_DIR/.env"
+  set +a
+fi
+
 if [[ -z "${OPENAI_API_KEY:-}" ]]; then
   echo "OPENAI_API_KEY is not set. Export it or add it to .env before running this smoke script." >&2
   exit 1

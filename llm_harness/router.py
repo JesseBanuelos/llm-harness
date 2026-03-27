@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 from concurrent.futures import ThreadPoolExecutor
+from collections.abc import Callable
 from dataclasses import dataclass
 from time import perf_counter
 
 from llm_harness.providers.claude_cli_provider import ClaudeCLIProvider
 from llm_harness.providers.openai_provider import OpenAIProvider
+
+ProviderFactory = Callable[[], OpenAIProvider | ClaudeCLIProvider]
 
 
 @dataclass(slots=True)
@@ -22,11 +25,15 @@ class HarnessRouter:
 
     def __init__(
         self,
-        openai_provider: OpenAIProvider,
-        claude_provider: ClaudeCLIProvider,
+        openai_provider: OpenAIProvider | None = None,
+        claude_provider: ClaudeCLIProvider | None = None,
+        openai_factory: ProviderFactory | None = None,
+        claude_factory: ProviderFactory | None = None,
     ) -> None:
         self.openai_provider = openai_provider
         self.claude_provider = claude_provider
+        self.openai_factory = openai_factory
+        self.claude_factory = claude_factory
 
     def dispatch(
         self,
@@ -41,7 +48,6 @@ class HarnessRouter:
             return [
                 self._call_provider(
                     provider="openai",
-                    provider_impl=self.openai_provider,
                     prompt=prompt,
                     system=system,
                     model=self._resolve_model(
@@ -57,7 +63,6 @@ class HarnessRouter:
             return [
                 self._call_provider(
                     provider="claude",
-                    provider_impl=self.claude_provider,
                     prompt=prompt,
                     system=system,
                     model=self._resolve_model(
@@ -77,7 +82,6 @@ class HarnessRouter:
                 "claude": executor.submit(
                     self._call_provider,
                     provider="claude",
-                    provider_impl=self.claude_provider,
                     prompt=prompt,
                     system=system,
                     model=self._resolve_model(
@@ -90,7 +94,6 @@ class HarnessRouter:
                 "openai": executor.submit(
                     self._call_provider,
                     provider="openai",
-                    provider_impl=self.openai_provider,
                     prompt=prompt,
                     system=system,
                     model=self._resolve_model(
@@ -121,16 +124,30 @@ class HarnessRouter:
             return getattr(self.claude_provider, "default_model", "sonnet")
         return getattr(self.openai_provider, "default_model", "gpt-4o")
 
-    @staticmethod
+    def _get_provider(self, provider: str) -> OpenAIProvider | ClaudeCLIProvider:
+        if provider == "openai":
+            if self.openai_provider is None:
+                if self.openai_factory is None:
+                    raise RuntimeError("OpenAI provider is not configured.")
+                self.openai_provider = self.openai_factory()
+            return self.openai_provider
+
+        if self.claude_provider is None:
+            if self.claude_factory is None:
+                raise RuntimeError("Claude provider is not configured.")
+            self.claude_provider = self.claude_factory()
+        return self.claude_provider
+
     def _call_provider(
+        self,
         provider: str,
-        provider_impl: OpenAIProvider | ClaudeCLIProvider,
         prompt: str,
         system: str | None,
         model: str,
     ) -> ProviderResult:
         started = perf_counter()
         try:
+            provider_impl = self._get_provider(provider)
             response = provider_impl.call(prompt=prompt, system=system, model=model)
             return ProviderResult(
                 provider=provider,

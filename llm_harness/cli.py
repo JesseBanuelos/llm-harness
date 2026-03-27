@@ -17,12 +17,12 @@ def build_router(
     output_format: str,
 ) -> HarnessRouter:
     stream_openai = provider_name == "openai" and output_format == "terminal"
-    openai_provider = OpenAIProvider(
+    openai_factory = lambda: OpenAIProvider(
         stream=stream_openai,
         stream_handler=lambda chunk: click.echo(chunk, nl=False),
     )
-    claude_provider = ClaudeCLIProvider(timeout=timeout)
-    return HarnessRouter(openai_provider=openai_provider, claude_provider=claude_provider)
+    claude_factory = lambda: ClaudeCLIProvider(timeout=timeout)
+    return HarnessRouter(openai_factory=openai_factory, claude_factory=claude_factory)
 
 
 def resolve_prompt(prompt: str | None) -> str:
