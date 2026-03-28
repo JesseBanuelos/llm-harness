@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import subprocess
 
 from llm_harness.providers.base import LLMProvider
@@ -20,11 +21,14 @@ class ClaudeCLIProvider(LLMProvider):
         if system:
             cmd.extend(["--system-prompt", system])
         cmd.append(prompt)
+        env = os.environ.copy()
+        env.pop("ANTHROPIC_API_KEY", None)
 
         try:
             result = subprocess.run(
                 cmd,
                 capture_output=True,
+                env=env,
                 text=True,
                 timeout=self.timeout,
                 check=False,

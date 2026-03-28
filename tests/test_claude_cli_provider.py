@@ -1,5 +1,6 @@
 import subprocess
 import unittest
+from unittest.mock import ANY
 from unittest.mock import patch
 
 from llm_harness.providers.claude_cli_provider import ClaudeCLIProvider
@@ -35,10 +36,13 @@ class ClaudeCLIProviderTests(unittest.TestCase):
                 "Summarize this",
             ],
             capture_output=True,
+            env=ANY,
             text=True,
             timeout=45,
             check=False,
         )
+        env = run_mock.call_args.kwargs["env"]
+        self.assertNotIn("ANTHROPIC_API_KEY", env)
 
     def test_call_raises_helpful_error_when_binary_missing(self) -> None:
         provider = ClaudeCLIProvider()
